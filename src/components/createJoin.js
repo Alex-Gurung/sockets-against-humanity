@@ -56,5 +56,10 @@ export default class createJoin extends React.Component {
       </div>
     );
   }
+  // componentDidMount() {
+  //   if (socket.hasOwnProperty('gameid')){
+  //     socket.emit('entered room', 'global')
+  //   }
+  // }
 
 }

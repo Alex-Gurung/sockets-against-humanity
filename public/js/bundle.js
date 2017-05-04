@@ -568,6 +568,12 @@ var createJoin = function (_React$Component) {
         )
       );
     }
+    // componentDidMount() {
+    //   if (socket.hasOwnProperty('gameid')){
+    //     socket.emit('entered room', 'global')
+    //   }
+    // }
+
   }]);
 
   return createJoin;
@@ -615,14 +621,16 @@ var thisGame = function (_React$Component) {
       },
       my_cards: [],
       card_list: [],
-      black_card: "",
+      black_card: "initial_black",
       position_list: [],
-      played_cards: "Cards go here",
+      played_cards: "Played Cards go here",
       played_cards_list: [],
       num_to_select: 0,
-      selected: []
+      selected: [],
+      last_winner: "last_winner"
     };
     _this.selectCard = _this.selectCard.bind(_this);
+    _this.czarSelect = _this.czarSelect.bind(_this);
     return _this;
   }
 
@@ -649,32 +657,41 @@ var thisGame = function (_React$Component) {
     key: 'updateChosen',
     value: function updateChosen(cards) {
       var listofChosen = [];
-      alert(cards[0]);
+      // alert(cards[0])
       for (var i = 0; i < cards.length; i++) {
         var ident = "chosencard-" + String(i);
         listofChosen.push(_react2.default.createElement(
           'button',
-          { id: ident },
+          { onClick: this.czarSelect, className: "", id: ident },
           String(cards[i])
         ));
       }
       this.setState({ played_cards: listofChosen });
     }
   }, {
+    key: 'czarSelect',
+    value: function czarSelect(e) {
+      if (this.state.position_list[socket.io.engine.id] === 'czar') {
+        if (this.state.played_cards.length == Object.keys(this.state.game_list).length - 1) {
+          e.currentTarget.setAttribute("class", "bg-indigo");
+          socket.emit('czar has chosen', e.currentTarget.innerText);
+        }
+      }
+    }
+  }, {
     key: 'selectCard',
     value: function selectCard(e) {
       if (this.state.position_list[socket.io.engine.id] !== 'czar') {
-        alert(this.state.position_list[socket.io.engine.id]);
+        // alert(this.state.position_list[socket.io.engine.id])
         if (this.state.selected.length < this.state.num_to_select) {
-          alert(e.currentTarget.innerText);
+          // alert(e.currentTarget.innerText)
           var temp_list = this.state.card_list;
           // for (var i = 0; i < temp_list.length; i++) {
-          //   temp_list[i].setAttribute("disabled", "disabled")
-          // }
+          // temp_list[i].setAttribute("disabled", "disabled") }
           e.currentTarget.setAttribute("class", "bg-indigo");
           var the_selects = this.state.selected;
           the_selects.push(e.currentTarget.innerText);
-          alert(the_selects);
+          // alert(the_selects)
           this.setState({ selected: the_selects });
         }
         if (this.state.selected.length == this.state.num_to_select) {
@@ -694,7 +711,7 @@ var thisGame = function (_React$Component) {
         var ident = "card-" + String(i);
         listofCards.push(_react2.default.createElement(
           'button',
-          { onClick: this.selectCard, id: ident },
+          { onClick: this.selectCard, className: "bg-white", id: ident },
           String(white_cards[i])
         ));
       }
@@ -702,6 +719,50 @@ var thisGame = function (_React$Component) {
       // classID={card}>{String(card)}</li> )
       this.setState({ my_cards: cards, card_list: listofCards, black_card: cards.black.text, num_to_select: cards.black.pick });
       // alert(cards)
+    }
+  }, {
+    key: 'updateLast',
+    value: function updateLast(selected) {
+      this.setState({ last_winner: selected });
+    }
+  }, {
+    key: 'updateBlack',
+    value: function updateBlack(blackCard) {
+      this.setState({ black_card: blackCard.text, num_to_select: blackCard.pick, played_cards: "Played Cards go here" });
+    }
+  }, {
+    key: 'updateWhite',
+    value: function updateWhite(new_whites) {
+      // alert(new_whites)
+      var buttons = document.querySelectorAll("button");
+      buttons.forEach(function (element) {
+        element.className = "bg-white";
+      });
+      var selects = this.state.selected;
+      var cards = this.state.my_cards;
+      var white_cards = Array.from(cards.white);
+      // console.log(white_cards)
+      var new_white_counter = 0;
+      for (var q = 0; q < white_cards.length; q++) {
+        for (var e = 0; e < selects.length; e++) {
+          if (white_cards[q] === selects[e]) {
+            white_cards[q] = new_whites[new_white_counter];
+            new_white_counter += 1;
+          }
+        }
+      }
+      // console.log(white_cards)
+      var listofCards = [];
+      for (var i = 0; i < white_cards.length; i++) {
+        var ident = "card-" + String(i);
+        listofCards.push(_react2.default.createElement(
+          'button',
+          { onClick: this.selectCard, className: "bg-white", id: ident },
+          String(white_cards[i])
+        ));
+      }
+      cards.white = white_cards;
+      this.setState({ my_cards: cards, card_list: listofCards, selected: [], played_cards: "Played Cards go here" });
     }
   }, {
     key: 'render',
@@ -713,25 +774,39 @@ var thisGame = function (_React$Component) {
           'h1',
           null,
           'Id: ',
-          this.state.gameId
+          this.state.gameId,
+          '  ||  ',
+          _react2.default.createElement(
+            'span',
+            null,
+            'Your Position: ',
+            this.state.position_list[socket.io.engine.id]
+          )
         ),
         _react2.default.createElement(
-          'h2',
-          null,
-          'Users: ',
-          this.state.users
-        ),
-        _react2.default.createElement(
-          'h2',
-          null,
-          'Your Position: ',
-          this.state.position_list[socket.io.engine.id]
-        ),
-        _react2.default.createElement(
-          'h2',
+          'h3',
           null,
           'Number users: ',
-          String(Object.keys(this.state.game_list).length)
+          String(Object.keys(this.state.game_list).length),
+          '  ||  ',
+          _react2.default.createElement(
+            'span',
+            null,
+            'Your Score: ',
+            String(this.state.game_list[socket.io.engine.id])
+          )
+        ),
+        _react2.default.createElement(
+          'h3',
+          null,
+          'Ugly dict (format later) : ',
+          JSON.stringify(this.state.game_list)
+        ),
+        _react2.default.createElement(
+          'h4',
+          null,
+          'Last winner: ',
+          this.state.last_winner
         ),
         _react2.default.createElement(
           'h1',
@@ -740,7 +815,7 @@ var thisGame = function (_React$Component) {
           this.state.black_card
         ),
         _react2.default.createElement(
-          'h2',
+          'h3',
           null,
           'Number to Select: ',
           this.state.num_to_select
@@ -786,6 +861,22 @@ var thisGame = function (_React$Component) {
 
       socket.on('update chosen', function (cards) {
         _this2.updateChosen(cards);
+      });
+
+      socket.on('last winner', function (selected) {
+        _this2.updateLast(selected);
+      });
+
+      socket.on('new black', function (blackCard) {
+        _this2.updateBlack(blackCard);
+      });
+
+      socket.on('send me white', function (please) {
+        socket.emit('new white cards', _this2.state.num_to_select);
+      });
+
+      socket.on('new white cards', function (new_whites) {
+        _this2.updateWhite(new_whites);
       });
     }
   }]);
