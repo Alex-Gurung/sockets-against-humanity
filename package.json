@@ -1,7 +1,7 @@
 {
-  "name": "socketsapp",
+  "name": "socketsagainsthumanity",
   "version": "1.0.0",
-  "description": "Universal React.js starter with the minimum possible code",
+  "description": "React and Socket.io webapp for cah",
   "main": "lib/server.js",
   "scripts": {
     "copy": "babel static --out-dir public --copy-files",

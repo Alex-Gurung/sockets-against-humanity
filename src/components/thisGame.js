@@ -18,7 +18,10 @@ export default class thisGame extends React.Component {
       played_cards_list: [],
       num_to_select: 0,
       selected: [],
-      last_winner: "last_winner"
+      last_winner: "last_winner",
+      nicknames: {'you': 'you'},
+      user_to_score: {'you': 0},
+      your_name: "you"
     }
     this.selectCard = this
       .selectCard
@@ -35,11 +38,25 @@ export default class thisGame extends React.Component {
   updateUsers(data) {
     var gameList = data.game
     var position = data.position
+    var usernames = data.nicknames
+    var new_user_to_score = {}
+    var ids = Object.keys(gameList)
+    var my_name = ""
+    for (var i = 0; i < ids.length; i++){
+      if (usernames.hasOwnProperty(ids[i])){
+        if (ids[i] == socket.id){
+          my_name = usernames[ids[i]]
+        }
+        new_user_to_score[usernames[ids[i]]] = gameList[ids[i]]
+      }
+    }
     // alert(data)
     this.setState({
       position_list: position,
       users: String(Object.keys(gameList)),
-      game_list: gameList
+      game_list: gameList,
+      user_to_score: new_user_to_score,
+      your_name: my_name
     });
     // console.log('data' + data) alert(this.state.my_cards)
   }
@@ -63,6 +80,7 @@ export default class thisGame extends React.Component {
           .currentTarget
           .setAttribute("class", "bg-indigo")
         socket.emit('czar has chosen', e.currentTarget.innerText)
+        this.setState({played_cards:"Played Cards go here"})
       }
     }
   }
@@ -99,7 +117,7 @@ export default class thisGame extends React.Component {
     for (var i = 0; i < white_cards.length; i++) {
       var ident = "card-" + String(i)
       listofCards.push(
-        <button onClick={this.selectCard} className={"bg-white"} id={ident}>{String(white_cards[i])}</button>
+        <button onClick={this.selectCard} className={"bg-white"} id={ident}>{white_cards[i]}</button>
       )
     }
     // var listofCards = white_cards.map((card) =>   <li
@@ -150,11 +168,14 @@ export default class thisGame extends React.Component {
   render() {
     return (
       <div>
-        <h1>Id: {this.state.gameId}  ||  <span>Your Position: {this.state.position_list[socket.io.engine.id]}</span></h1>
+        <h1>Game id: {this.state.gameId}  ||  <span>Your Position: {this.state.position_list[socket.io.engine.id]}</span></h1>
         {/*<h2>User: {String(Object.keys(this.state.users))}</h2>*/}
         {/*<h2>Users: {this.state.users}</h2>*/}
-        <h3>Number users: {String(Object.keys(this.state.game_list).length)}  ||  <span>Your Score: {String(this.state.game_list[socket.io.engine.id])}</span></h3>
-        <h3>Ugly dict (format later) : {JSON.stringify(this.state.game_list)}</h3>
+        <h3>Number users: {String(Object.keys(this.state.game_list).length)}  ||  <span>Your Score: {String(this.state.game_list[socket.io.engine.id])}  ||  </span>
+        <span>Your name: {String(this.state.your_name)}</span>
+        </h3>
+        <h3>Ugly dict (format later) : {JSON.stringify(this.state.user_to_score)}</h3>
+        {/*<h3>Ugly dict (format later) : {JSON.stringify(this.state.game_list)}</h3>*/}
         <h4>Last winner: {this.state.last_winner}</h4>
         <h1>Black Card: {this.state.black_card}</h1>
         <h3>Number to Select: {this.state.num_to_select}</h3>
@@ -166,7 +187,7 @@ export default class thisGame extends React.Component {
     );
   }
   componentDidMount() {
-    socket.emit('entered room', this.state.gameId)
+    socket.emit('entered room', {ident: this.state.gameId, username: prompt('enter username')})
     socket.on('enter message', (data) => {
       this.someoneEntered(data);
     })

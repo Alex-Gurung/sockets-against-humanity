@@ -29,7 +29,7 @@ let server = app.listen(server_port, server_ip_address, function () {
     host = 'localhost';
   }
 
-  console.log('Example app listening at http://%s:%s', host, port);
+  console.log('App listening at http://%s:%s', host, port);
 });
 // let server = app.listen(process.env.PORT || 8080, function () {     var host
 // = server.address().address;     var port = server.address().port;
@@ -43,6 +43,7 @@ let chosen_cards = {};
 position_list['global'] = {}
 games_list['global'] = {}
 decks_list['global'] = {}
+let username_list = {}
 io.sockets.on('connection', (socket) => {
   // console.log('new connection');
   // console.log(czar_string)
@@ -52,15 +53,31 @@ io.sockets.on('connection', (socket) => {
       if (games_list[socket.room].hasOwnProperty(socket.id)) {
         delete games_list[socket.room][socket.id]
       }
-      if (Object.keys(games_list[socket.room]).length == 0) {
-        delete games_list[socket.room]
+      // if (Object.keys(games_list[socket.room]).length == 0) {
+      //   delete games_list[socket.room]
+      // }
+      if (chosen_cards[socket.room].hasOwnProperty(socket.id)) {
+            delete chosen_cards[socket.room][socket.id]
       }
+      // if (Object.keys(chosen_cards[socket.room]).length == 0) {
+      //   delete chosen_cards[socket.room]
+      // }
+      if (username_list[socket.room].hasOwnProperty(socket.id)){
+        delete username_list[socket.room][socket.id]
+      }
+      // if (Object.keys(username_list[socket.room]).length == 0) {
+      //   delete username_list[socket.room]
+      // }
     }
     if (games_list.hasOwnProperty(old_room)) {
       socket
         .broadcast
         .to(old_room)
-        .emit('update users', games_list[old_room])
+        .emit('update users',{
+        game: games_list[old_room],
+        position: position_list[old_room],
+        nicknames: username_list[old_room]
+      })
     }
     io.emit('returned game list', Object.keys(games_list))
     // console.log('new disconnection');
@@ -82,16 +99,34 @@ io.sockets.on('connection', (socket) => {
     socket.join(game_id)
     socket.room = game_id
   })
-  socket.on('entered room', (game_id) => {
+  socket.on('entered room', (data) => {
+    var game_id = data.ident
+    var username = data.username
     if (games_list.hasOwnProperty(socket.room)) {
       if (games_list[socket.room].hasOwnProperty(socket.id)) {
         delete games_list[socket.room][socket.id]
-        delete chosen_cards[game_id][socket.id]
       }
+      // if (Object.keys(games_list[socket.room]).length == 0) {
+      //   delete games_list[socket.room]
+      // }
+      if (chosen_cards[socket.room].hasOwnProperty(socket.id)) {
+            delete chosen_cards[socket.room][socket.id]
+      }
+      // if (Object.keys(chosen_cards[socket.room]).length == 0) {
+      //   delete chosen_cards[socket.room]
+      // }
+      if (username_list[socket.room].hasOwnProperty(socket.id)){
+        delete username_list[socket.room][socket.id]
+      }
+      // if (Object.keys(username_list[socket.room]).length == 0) {
+      //   delete username_list[socket.room]
+      // }
     }
 
     if (!games_list.hasOwnProperty(game_id)) {
       games_list[game_id] = {}
+      username_list[game_id] = {}
+      username_list[game_id][socket.id] = username
       // games_list[game_id]['czar'] = socket.id
       chosen_cards[game_id] = {}
       chosen_cards[game_id][socket.id] = ""
@@ -108,6 +143,7 @@ io.sockets.on('connection', (socket) => {
         decks_list[game_id]['blackCards'] = decks_list[game_id]['deck']['blackCards']
       }
     } else {
+      username_list[game_id][socket.id] = username
       position_list[game_id][socket.id] = 'player'
     }
 
@@ -134,7 +170,16 @@ io.sockets.on('connection', (socket) => {
       }
     }
 
-
+    socket
+      .broadcast
+      .to(socket.room)
+      .emit('update users', {
+        game: games_list[socket.room],
+        position: position_list[socket.room],
+        nicknames: username_list[socket.room]
+      })
+    socket.leave(socket.room)
+    socket.join(game_id)
     socket.cards = cards_list
     // console.log(cards_list)
     socket.emit('your cards', {
@@ -143,18 +188,11 @@ io.sockets.on('connection', (socket) => {
     })
 
 
-    socket
-      .broadcast
-      .to(socket.room)
-      .emit('update users', {
-        game: games_list[socket.room],
-        position: position_list[game_id]
-      })
-    socket.leave(socket.room)
+    
     socket.room = game_id
     games_list[game_id][socket.id] = 0
 
-    socket.join(game_id)
+    
 
     // socket.emit('enter message', {user: socket.id, message: socket.id + "has
     // enter game: " + game_id})
@@ -170,11 +208,13 @@ io.sockets.on('connection', (socket) => {
       .to(game_id)
       .emit('update users', {
         game: games_list[game_id],
-        position: position_list[game_id]
+        position: position_list[game_id],
+        nicknames: username_list[game_id]
       })
     socket.emit('update users', {
       game: games_list[game_id],
-      position: position_list[game_id]
+      position: position_list[game_id],
+      nicknames: username_list[game_id]
     })
 
     // console.log(game_id)
@@ -238,11 +278,13 @@ io.sockets.on('connection', (socket) => {
 
     socket.broadcast.to(socket.room).emit('update users', {
       game: games_list[socket.room],
-      position: position_list[socket.room]
+      position: position_list[socket.room],
+      nicknames: username_list[socket.room]
     })
     socket.emit('update users', {
       game: games_list[socket.room],
-      position: position_list[socket.room]
+      position: position_list[socket.room],
+      nicknames: username_list[socket.room]
     })
 
     socket.broadcast.to(socket.room).emit('last winner', selected)
@@ -255,6 +297,15 @@ io.sockets.on('connection', (socket) => {
     if (decks_list[socket.room]['blackCards'].length == 0) {
       decks_list[socket.room]['blackCards'] = decks_list[socket.room]['deck']['blackCards']
     }
+    while (!decks_list[socket.room]['black_card']){
+    var index = Math.floor(Math.random() * decks_list[socket.room]['blackCards'].length)
+    decks_list[socket.room]['black_card'] = decks_list[socket.room]['blackCards'][index]
+    delete decks_list[socket.room]['blackCards'][index]
+    if (decks_list[socket.room]['blackCards'].length == 0) {
+      decks_list[socket.room]['blackCards'] = decks_list[socket.room]['deck']['blackCards']
+    }
+  }
+    
 
     socket.broadcast.to(socket.room).emit('new black', decks_list[socket.room]['black_card'])
     socket.emit('new black', decks_list[socket.room]['black_card'])
@@ -282,8 +333,9 @@ io.sockets.on('connection', (socket) => {
       var index = Math.floor(Math.random() * decks_list[socket.room]['whiteCards'].length)
       var this_card = decks_list[socket.room]['whiteCards'][index];
       if (this_card) {
-        if (String(this_card) !== undefined)
+        if (this_card && String(this_card) !== undefined && !String(this_card).includes('undefined')){
           cards_list.push(decks_list[socket.room]['whiteCards'][index])
+        }
       }
       delete decks_list[socket.room]['whiteCards'][index]
       if (decks_list[socket.room]['whiteCards'].length == 0) {
