@@ -15,7 +15,9 @@ app.use(express.static('public'));
 // res.sendFile(__dirname + '/index.html');   // res.render('layout', {   //
 // content: ReactDOMServer.renderToString(<HelloWorld />)   // }); }); Start
 // server
-let server = app.listen(8080, function () {
+var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
+var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
+let server = app.listen(server_port, server_ip_address, function () {
   let host = server
     .address()
     .address;
