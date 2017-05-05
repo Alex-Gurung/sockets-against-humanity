@@ -52,7 +52,7 @@ io.sockets.on('connection', (socket) => {
     var old_id = socket.id
     if (games_list.hasOwnProperty(old_room)) {
       if (games_list[old_room].hasOwnProperty(old_id)) {
-        delete games_list[old_room][socket.id]
+        delete games_list[old_room][old_id]
       }
       // if (Object.keys(games_list[socket.room]).length == 0) {
       //   delete games_list[socket.room]
@@ -145,24 +145,67 @@ io.sockets.on('connection', (socket) => {
   socket.on('entered room', (data) => {
     var game_id = data.ident
     var username = data.username
-    if (games_list.hasOwnProperty(socket.room)) {
-      if (games_list[socket.room].hasOwnProperty(socket.id)) {
-        delete games_list[socket.room][socket.id]
+    var old_room = socket.room
+    var old_id = socket.id
+    if (games_list.hasOwnProperty(old_room)) {
+      if (games_list[old_room].hasOwnProperty(old_id)) {
+        delete games_list[old_room][socket.id]
       }
       // if (Object.keys(games_list[socket.room]).length == 0) {
       //   delete games_list[socket.room]
       // }
-      if (chosen_cards[socket.room].hasOwnProperty(socket.id)) {
-        delete chosen_cards[socket.room][socket.id]
+    }
+    if (chosen_cards.hasOwnProperty(old_room)) {
+      if (chosen_cards[old_room].hasOwnProperty(old_id)) {
+        delete chosen_cards[old_room][old_id]
       }
-      // if (Object.keys(chosen_cards[socket.room]).length == 0) {
-      //   delete chosen_cards[socket.room]
+      // if (Object.keys(chosen_cards[old_room]).length == 0) {
+      //   delete chosen_cards[old_room]
       // }
-      if (username_list[socket.room].hasOwnProperty(socket.id)) {
-        delete username_list[socket.room][socket.id]
+    }
+    if (username_list.hasOwnProperty(old_room)) {
+      if (username_list[old_room].hasOwnProperty(old_id)) {
+        delete username_list[old_room][old_id]
       }
-      // if (Object.keys(username_list[socket.room]).length == 0) {
-      //   delete username_list[socket.room]
+      // if (Object.keys(username_list[old_room]).length == 0) {
+      //   delete username_list[old_room]
+      // }
+    }
+    if (position_list.hasOwnProperty(old_room)) {
+      var was_czar = false;
+      if (position_list[old_room].hasOwnProperty(old_id)) {
+        was_czar = position_list[old_room][old_id] === 'czar'
+        delete position_list[old_room][old_id]
+      }
+      // if (Object.keys(position_list[old_room].length == 0)) {
+      //   console.log('delete position list')
+      //   delete position_list[old_room]
+      // } else {
+        if (was_czar) {
+          var keys = Object.keys(position_list[old_room])
+          console.log(keys)
+          if (keys){
+          position_list[old_room][keys[0]] = 'czar'}
+        } else {
+          var foundCzar = false;
+          var continue_looking = true;
+          for (var key in position_list[old_room]) {
+            if (continue_looking) {
+              if (position_list[old_room].hasOwnProperty(key)) {
+                if (position_list[old_room][key] === 'czar') {
+                  position_list[old_room][key] = 'player'
+                  foundCzar = true;
+                } else if (foundCzar) {
+                  position_list[old_room][key] = 'czar'
+                  continue_looking = false;
+                }
+              }
+            }
+          }
+          if (continue_looking && foundCzar) {
+            position_list[old_room][keys[0]] = 'czar'
+          }
+        }
       // }
     }
 
