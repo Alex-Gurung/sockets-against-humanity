@@ -171,12 +171,13 @@ export default class thisGame extends React.Component {
         <h1>Game id: {this.state.gameId}  ||  <span>Your Position: {this.state.position_list[socket.io.engine.id]}</span></h1>
         {/*<h2>User: {String(Object.keys(this.state.users))}</h2>*/}
         {/*<h2>Users: {this.state.users}</h2>*/}
+        <h2>Last winner: {this.state.last_winner}</h2>
         <h3>Number users: {String(Object.keys(this.state.game_list).length)}  ||  <span>Your Score: {String(this.state.game_list[socket.io.engine.id])}  ||  </span>
         <span>Your name: {String(this.state.your_name)}</span>
         </h3>
         <h3>Ugly dict (format later) : {JSON.stringify(this.state.user_to_score)}</h3>
         {/*<h3>Ugly dict (format later) : {JSON.stringify(this.state.game_list)}</h3>*/}
-        <h4>Last winner: {this.state.last_winner}</h4>
+        
         <h1>Black Card: {this.state.black_card}</h1>
         <h3>Number to Select: {this.state.num_to_select}</h3>
         <p>Your Cards:</p>

@@ -36,14 +36,15 @@ export default class createJoin extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className={'flexBox'}>
         <h1>Create/Join</h1>
         {/*<button onClick={this.createGame}>
           Create/Join Game!
         </button>*/}
         
-        <input type="text" value={this.state.gameid} onChange={this.handleChange}/>
-        <Link to={this.state.gameurl}>Go to Game</Link>
+        <input className={'centerClass'}  type="text" value={this.state.gameid} onChange={this.handleChange}/>
+        <br />
+        <Link className={'centerClass'} to={this.state.gameurl}>Go to Game</Link>
 
         {/*<h1>Some App Name</h1>
         <ul className="header">

@@ -49,35 +49,78 @@ io.sockets.on('connection', (socket) => {
   // console.log(czar_string)
   socket.on('disconnect', () => {
     var old_room = socket.room
-    if (games_list.hasOwnProperty(socket.room)) {
-      if (games_list[socket.room].hasOwnProperty(socket.id)) {
-        delete games_list[socket.room][socket.id]
+    var old_id = socket.id
+    if (games_list.hasOwnProperty(old_room)) {
+      if (games_list[old_room].hasOwnProperty(old_id)) {
+        delete games_list[old_room][socket.id]
       }
       // if (Object.keys(games_list[socket.room]).length == 0) {
       //   delete games_list[socket.room]
       // }
-      if (chosen_cards[socket.room].hasOwnProperty(socket.id)) {
-            delete chosen_cards[socket.room][socket.id]
+    }
+    if (chosen_cards.hasOwnProperty(old_room)) {
+      if (chosen_cards[old_room].hasOwnProperty(old_id)) {
+        delete chosen_cards[old_room][old_id]
       }
-      // if (Object.keys(chosen_cards[socket.room]).length == 0) {
-      //   delete chosen_cards[socket.room]
-      // }
-      if (username_list[socket.room].hasOwnProperty(socket.id)){
-        delete username_list[socket.room][socket.id]
-      }
-      // if (Object.keys(username_list[socket.room]).length == 0) {
-      //   delete username_list[socket.room]
+      // if (Object.keys(chosen_cards[old_room]).length == 0) {
+      //   delete chosen_cards[old_room]
       // }
     }
+    if (username_list.hasOwnProperty(old_room)) {
+      if (username_list[old_room].hasOwnProperty(old_id)) {
+        delete username_list[old_room][old_id]
+      }
+      // if (Object.keys(username_list[old_room]).length == 0) {
+      //   delete username_list[old_room]
+      // }
+    }
+    if (position_list.hasOwnProperty(old_room)) {
+      var was_czar = false;
+      if (position_list[old_room].hasOwnProperty(old_id)) {
+        was_czar = position_list[old_room][old_id] === 'czar'
+        delete position_list[old_room][old_id]
+      }
+      // if (Object.keys(position_list[old_room].length == 0)) {
+      //   console.log('delete position list')
+      //   delete position_list[old_room]
+      // } else {
+        if (was_czar) {
+          var keys = Object.keys(position_list[old_room])
+          console.log(keys)
+          if (keys){
+          position_list[old_room][keys[0]] = 'czar'}
+        } else {
+          var foundCzar = false;
+          var continue_looking = true;
+          for (var key in position_list[old_room]) {
+            if (continue_looking) {
+              if (position_list[old_room].hasOwnProperty(key)) {
+                if (position_list[old_room][key] === 'czar') {
+                  position_list[old_room][key] = 'player'
+                  foundCzar = true;
+                } else if (foundCzar) {
+                  position_list[old_room][key] = 'czar'
+                  continue_looking = false;
+                }
+              }
+            }
+          }
+          if (continue_looking && foundCzar) {
+            position_list[old_room][keys[0]] = 'czar'
+          }
+        }
+      // }
+    }
+    console.log(position_list[old_room])
     if (games_list.hasOwnProperty(old_room)) {
       socket
         .broadcast
         .to(old_room)
-        .emit('update users',{
-        game: games_list[old_room],
-        position: position_list[old_room],
-        nicknames: username_list[old_room]
-      })
+        .emit('update users', {
+          game: games_list[old_room],
+          position: position_list[old_room],
+          nicknames: username_list[old_room]
+        })
     }
     io.emit('returned game list', Object.keys(games_list))
     // console.log('new disconnection');
@@ -90,7 +133,7 @@ io.sockets.on('connection', (socket) => {
     // console.log(socket.id)
   })
   socket.on('create or join game', (game_id) => {
-    console.log('fsdfdsf')
+    // console.log('fsdfdsf')
     if (!games_list.hasOwnProperty(game_id)) {
       games_list[game_id] = {}
       games_list[game_id]['czar'] = socket.id
@@ -110,12 +153,12 @@ io.sockets.on('connection', (socket) => {
       //   delete games_list[socket.room]
       // }
       if (chosen_cards[socket.room].hasOwnProperty(socket.id)) {
-            delete chosen_cards[socket.room][socket.id]
+        delete chosen_cards[socket.room][socket.id]
       }
       // if (Object.keys(chosen_cards[socket.room]).length == 0) {
       //   delete chosen_cards[socket.room]
       // }
-      if (username_list[socket.room].hasOwnProperty(socket.id)){
+      if (username_list[socket.room].hasOwnProperty(socket.id)) {
         delete username_list[socket.room][socket.id]
       }
       // if (Object.keys(username_list[socket.room]).length == 0) {
@@ -188,11 +231,11 @@ io.sockets.on('connection', (socket) => {
     })
 
 
-    
+
     socket.room = game_id
     games_list[game_id][socket.id] = 0
 
-    
+
 
     // socket.emit('enter message', {user: socket.id, message: socket.id + "has
     // enter game: " + game_id})
@@ -226,8 +269,8 @@ io.sockets.on('connection', (socket) => {
 
   socket.on('selected cards', (selected_cards) => {
     chosen_cards[socket.room][socket.id] = selected_cards
-    console.log(chosen_cards[socket.room])
-    console.log(position_list[socket.room])
+    // console.log(chosen_cards[socket.room])
+    // console.log(position_list[socket.room])
     var cards = []
     for (var key in chosen_cards[socket.room]) {
       if (chosen_cards[socket.room].hasOwnProperty(key)) {
@@ -259,17 +302,16 @@ io.sockets.on('connection', (socket) => {
       if (continue_looking) {
         if (position_list[socket.room].hasOwnProperty(key)) {
           if (position_list[socket.room][key] === 'czar') {
-              position_list[socket.room][key] = 'player'
-              foundCzar = true;
-          }
-          else if (foundCzar) {
+            position_list[socket.room][key] = 'player'
+            foundCzar = true;
+          } else if (foundCzar) {
             position_list[socket.room][key] = 'czar'
             continue_looking = false;
           }
         }
       }
     }
-    if (continue_looking && foundCzar){
+    if (continue_looking && foundCzar) {
       position_list[socket.room][keys[0]] = 'czar'
     }
     // position_list[socket.room][keys[counter + 1]] = 'czar'
@@ -297,15 +339,15 @@ io.sockets.on('connection', (socket) => {
     if (decks_list[socket.room]['blackCards'].length == 0) {
       decks_list[socket.room]['blackCards'] = decks_list[socket.room]['deck']['blackCards']
     }
-    while (!decks_list[socket.room]['black_card']){
-    var index = Math.floor(Math.random() * decks_list[socket.room]['blackCards'].length)
-    decks_list[socket.room]['black_card'] = decks_list[socket.room]['blackCards'][index]
-    delete decks_list[socket.room]['blackCards'][index]
-    if (decks_list[socket.room]['blackCards'].length == 0) {
-      decks_list[socket.room]['blackCards'] = decks_list[socket.room]['deck']['blackCards']
+    while (!decks_list[socket.room]['black_card']) {
+      var index = Math.floor(Math.random() * decks_list[socket.room]['blackCards'].length)
+      decks_list[socket.room]['black_card'] = decks_list[socket.room]['blackCards'][index]
+      delete decks_list[socket.room]['blackCards'][index]
+      if (decks_list[socket.room]['blackCards'].length == 0) {
+        decks_list[socket.room]['blackCards'] = decks_list[socket.room]['deck']['blackCards']
+      }
     }
-  }
-    
+
 
     socket.broadcast.to(socket.room).emit('new black', decks_list[socket.room]['black_card'])
     socket.emit('new black', decks_list[socket.room]['black_card'])
@@ -333,7 +375,7 @@ io.sockets.on('connection', (socket) => {
       var index = Math.floor(Math.random() * decks_list[socket.room]['whiteCards'].length)
       var this_card = decks_list[socket.room]['whiteCards'][index];
       if (this_card) {
-        if (this_card && String(this_card) !== undefined && !String(this_card).includes('undefined')){
+        if (this_card && String(this_card) !== undefined && !String(this_card).includes('undefined')) {
           cards_list.push(decks_list[socket.room]['whiteCards'][index])
         }
       }

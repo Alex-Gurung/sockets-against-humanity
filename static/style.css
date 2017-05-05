@@ -1,7 +1,9 @@
-body, html {
+body,
+html {
     margin: 0;
     padding: 0;
 }
+
 .navigation {
     list-style-type: none;
     margin: 0;
@@ -26,10 +28,24 @@ body, html {
 .headerList a:hover {
     background-color: #111111;
 }
+
 .mainContent {
     padding: 20px;
     margin-left: 50px;
 }
+
 button {
-    margin: 20px; 
+    margin: 20px;
+}
+
+.flexBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.centerClass {
+    max-width: 50%;
+    flex: 1;
+    justify-content: space-between;
 }

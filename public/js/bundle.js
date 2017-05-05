@@ -270,11 +270,6 @@ var Games = function (_React$Component) {
         'div',
         null,
         _react2.default.createElement(
-          'h2',
-          null,
-          'Games'
-        ),
-        _react2.default.createElement(
           _reactRouterDom.Switch,
           null,
           _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/game', component: _AllGames2.default }),
@@ -554,16 +549,17 @@ var createJoin = function (_React$Component) {
     value: function render() {
       return _react2.default.createElement(
         'div',
-        null,
+        { className: 'flexBox' },
         _react2.default.createElement(
           'h1',
           null,
           'Create/Join'
         ),
-        _react2.default.createElement('input', { type: 'text', value: this.state.gameid, onChange: this.handleChange }),
+        _react2.default.createElement('input', { className: 'centerClass', type: 'text', value: this.state.gameid, onChange: this.handleChange }),
+        _react2.default.createElement('br', null),
         _react2.default.createElement(
           _reactRouterDom.Link,
-          { to: this.state.gameurl },
+          { className: 'centerClass', to: this.state.gameurl },
           'Go to Game'
         )
       );
@@ -802,6 +798,12 @@ var thisGame = function (_React$Component) {
           )
         ),
         _react2.default.createElement(
+          'h2',
+          null,
+          'Last winner: ',
+          this.state.last_winner
+        ),
+        _react2.default.createElement(
           'h3',
           null,
           'Number users: ',
@@ -826,12 +828,6 @@ var thisGame = function (_React$Component) {
           null,
           'Ugly dict (format later) : ',
           JSON.stringify(this.state.user_to_score)
-        ),
-        _react2.default.createElement(
-          'h4',
-          null,
-          'Last winner: ',
-          this.state.last_winner
         ),
         _react2.default.createElement(
           'h1',
