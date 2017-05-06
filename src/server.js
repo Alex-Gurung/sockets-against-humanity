@@ -86,40 +86,27 @@ io.sockets.on('connection', (socket) => {
       // } else {
         if (was_czar) {
           var keys = Object.keys(position_list[old_room])
+          console.log(position_list)
           console.log(keys)
           if (keys){
-          position_list[old_room][keys[0]] = 'czar'}
-        } else {
-          var foundCzar = false;
-          var continue_looking = true;
-          for (var key in position_list[old_room]) {
-            if (continue_looking) {
-              if (position_list[old_room].hasOwnProperty(key)) {
-                if (position_list[old_room][key] === 'czar') {
-                  position_list[old_room][key] = 'player'
-                  foundCzar = true;
-                } else if (foundCzar) {
-                  position_list[old_room][key] = 'czar'
-                  continue_looking = false;
-                }
-              }
-            }
+          position_list[old_room][keys[0]] = 'czar'
+          if (chosen_cards[old_room].hasOwnProperty(keys[0])){
+            delete chosen_cards[old_room][keys[0]]
           }
-          if (continue_looking && foundCzar) {
-            position_list[old_room][keys[0]] = 'czar'
-          }
+        }
         }
       // }
     }
-    console.log(position_list[old_room])
+    // console.log(position_list[old_room])
     if (games_list.hasOwnProperty(old_room)) {
       socket
         .broadcast
         .to(old_room)
-        .emit('update users', {
+        .emit('update users bad?', {
           game: games_list[old_room],
           position: position_list[old_room],
-          nicknames: username_list[old_room]
+          nicknames: username_list[old_room],
+          chosen: chosen_cards[old_room] 
         })
     }
     io.emit('returned game list', Object.keys(games_list))
@@ -183,29 +170,14 @@ io.sockets.on('connection', (socket) => {
       // } else {
         if (was_czar) {
           var keys = Object.keys(position_list[old_room])
+          console.log(position_list)
           console.log(keys)
           if (keys){
-          position_list[old_room][keys[0]] = 'czar'}
-        } else {
-          var foundCzar = false;
-          var continue_looking = true;
-          for (var key in position_list[old_room]) {
-            if (continue_looking) {
-              if (position_list[old_room].hasOwnProperty(key)) {
-                if (position_list[old_room][key] === 'czar') {
-                  position_list[old_room][key] = 'player'
-                  foundCzar = true;
-                } else if (foundCzar) {
-                  position_list[old_room][key] = 'czar'
-                  continue_looking = false;
-                }
-              }
-            }
-          }
-          if (continue_looking && foundCzar) {
-            position_list[old_room][keys[0]] = 'czar'
-          }
-        }
+          position_list[old_room][keys[0]] = 'czar'
+        if (chosen_cards[old_room].hasOwnProperty(keys[0])){
+            delete chosen_cards[old_room][keys[0]]
+          }}
+        } 
       // }
     }
 
@@ -244,6 +216,17 @@ io.sockets.on('connection', (socket) => {
     //     decks_list[game_id]['whiteCards'] = decks_list[game_id]['deck']['whiteCards']
     //   }
     // }
+
+    socket
+      .broadcast
+      .to(socket.room)
+      .emit('update users bad?', {
+        game: games_list[socket.room],
+        position: position_list[socket.room],
+        nicknames: username_list[socket.room],
+        chosen: chosen_cards[socket.room]
+      })
+
     while (cards_list.length < 7) {
       var index = Math.floor(Math.random() * decks_list[game_id]['whiteCards'].length)
       var this_card = decks_list[game_id]['whiteCards'][index];
@@ -256,14 +239,7 @@ io.sockets.on('connection', (socket) => {
       }
     }
 
-    socket
-      .broadcast
-      .to(socket.room)
-      .emit('update users', {
-        game: games_list[socket.room],
-        position: position_list[socket.room],
-        nicknames: username_list[socket.room]
-      })
+    
     socket.leave(socket.room)
     socket.join(game_id)
     socket.cards = cards_list
@@ -295,12 +271,14 @@ io.sockets.on('connection', (socket) => {
       .emit('update users', {
         game: games_list[game_id],
         position: position_list[game_id],
-        nicknames: username_list[game_id]
+        nicknames: username_list[game_id],
+        chosen: chosen_cards[game_id]
       })
     socket.emit('update users', {
       game: games_list[game_id],
       position: position_list[game_id],
-      nicknames: username_list[game_id]
+      nicknames: username_list[game_id],
+      chosen: chosen_cards[game_id]
     })
 
     // console.log(game_id)
@@ -359,7 +337,7 @@ io.sockets.on('connection', (socket) => {
     }
     // position_list[socket.room][keys[counter + 1]] = 'czar'
 
-    console.log(position_list[socket.room])
+    // console.log(position_list[socket.room])
 
     socket.broadcast.to(socket.room).emit('update users', {
       game: games_list[socket.room],

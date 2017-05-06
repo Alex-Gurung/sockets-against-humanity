@@ -39,6 +39,7 @@ export default class thisGame extends React.Component {
     var gameList = data.game
     var position = data.position
     var usernames = data.nicknames
+    var chosen = data.chosenCards
     var new_user_to_score = {}
     var ids = Object.keys(gameList)
     var my_name = ""
@@ -56,8 +57,9 @@ export default class thisGame extends React.Component {
       users: String(Object.keys(gameList)),
       game_list: gameList,
       user_to_score: new_user_to_score,
-      your_name: my_name
+      your_name: my_name,
     });
+    this.updateChosen(chosen)
     // console.log('data' + data) alert(this.state.my_cards)
   }
 
@@ -194,6 +196,11 @@ export default class thisGame extends React.Component {
     })
     socket.on('update users', (data) => {
       this.updateUsers(data);
+    })
+    socket.on('update users bad?', (data) => {
+      this.updateUsers(data);
+      this.setState({selected: []})
+      alert('someone disconnected, ignore pre-existing highlighted cards')
     })
     socket.on('your cards', (cards) => {
       console.log(cards)
