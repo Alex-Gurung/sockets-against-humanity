@@ -342,12 +342,14 @@ io.sockets.on('connection', (socket) => {
     socket.broadcast.to(socket.room).emit('update users', {
       game: games_list[socket.room],
       position: position_list[socket.room],
-      nicknames: username_list[socket.room]
+      nicknames: username_list[socket.room],
+      chosen: chosen_cards[socket.room]
     })
     socket.emit('update users', {
       game: games_list[socket.room],
       position: position_list[socket.room],
-      nicknames: username_list[socket.room]
+      nicknames: username_list[socket.room],
+      chosen: chosen_cards[socket.room]
     })
 
     socket.broadcast.to(socket.room).emit('last winner', selected)
