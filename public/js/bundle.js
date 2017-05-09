@@ -99,17 +99,30 @@ var AllGames = function (_React$Component) {
   _createClass(AllGames, [{
     key: 'setGameList',
     value: function setGameList(gameList_from_server) {
-      var gameList = Array.from(gameList_from_server);
+      var games = Array.from(gameList_from_server);
+      var gameList = [];
+      for (var i = 0; i < games.length; i++) {
+        var game = games[i];
+        if (!game.includes('global')) {
+          gameList.push(game);
+        }
+      }
       // alert(typeof gameList)
       // alert(gameList.length)
+      // var listofLinks = []
+
       var listofLinks = gameList.map(function (game) {
         return _react2.default.createElement(
           'li',
           null,
           _react2.default.createElement(
-            _reactRouterDom.Link,
-            { to: '/game/' + game },
-            String(game)
+            'button',
+            null,
+            _react2.default.createElement(
+              _reactRouterDom.Link,
+              { to: '/game/' + game },
+              String(game)
+            )
           )
         );
       });
@@ -127,12 +140,7 @@ var AllGames = function (_React$Component) {
         _react2.default.createElement(
           'h1',
           null,
-          'AllGames'
-        ),
-        _react2.default.createElement(
-          'h2',
-          null,
-          this.state.game_list
+          'All Games'
         ),
         _react2.default.createElement(
           'ul',
@@ -401,10 +409,10 @@ var Home = function (_React$Component) {
     value: function render() {
       return _react2.default.createElement(
         'div',
-        null,
+        { className: 'title-screen' },
         _react2.default.createElement(
           'h1',
-          null,
+          { className: "title" },
           'Sockets Against Humanity!'
         )
       );
@@ -725,11 +733,15 @@ var thisGame = function (_React$Component) {
       var listofCards = [];
       for (var i = 0; i < white_cards.length; i++) {
         var ident = "card-" + String(i);
-        listofCards.push(_react2.default.createElement(
-          'button',
-          { onClick: this.selectCard, className: "bg-white", id: ident },
-          white_cards[i]
-        ));
+        if (!String(white_cards[i]).includes('undefined')) {
+          listofCards.push(_react2.default.createElement(
+            'button',
+            { onClick: this.selectCard, className: "bg-white", id: ident },
+            white_cards[i]
+          ));
+        } else {
+          socket.emit('new white cards', 1);
+        }
       }
       // var listofCards = white_cards.map((card) =>   <li
       // classID={card}>{String(card)}</li> )

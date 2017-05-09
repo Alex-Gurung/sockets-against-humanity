@@ -99,6 +99,9 @@ io.sockets.on('connection', (socket) => {
     }
     // console.log(position_list[old_room])
     if (games_list.hasOwnProperty(old_room)) {
+      if (!chosen_cards.hasOwnProperty(old_room)){
+        chosen_cards[old_room] = []
+      }
       socket
         .broadcast
         .to(old_room)
@@ -216,7 +219,9 @@ io.sockets.on('connection', (socket) => {
     //     decks_list[game_id]['whiteCards'] = decks_list[game_id]['deck']['whiteCards']
     //   }
     // }
-
+    if (!chosen_cards.hasOwnProperty(old_room)){
+        chosen_cards[old_room] = []
+      }
     socket
       .broadcast
       .to(socket.room)
@@ -265,6 +270,9 @@ io.sockets.on('connection', (socket) => {
         user: socket.id,
         message: socket.id + "has enter game: " + game_id
       })
+      if (!chosen_cards.hasOwnProperty(game_id)){
+        chosen_cards[game_id] = []
+      }
     socket
       .broadcast
       .to(game_id)
@@ -338,7 +346,9 @@ io.sockets.on('connection', (socket) => {
     // position_list[socket.room][keys[counter + 1]] = 'czar'
 
     // console.log(position_list[socket.room])
-
+    if (!chosen_cards.hasOwnProperty(socket.room)){
+        chosen_cards[socket.room] = []
+      }
     socket.broadcast.to(socket.room).emit('update users', {
       game: games_list[socket.room],
       position: position_list[socket.room],

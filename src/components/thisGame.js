@@ -118,9 +118,14 @@ export default class thisGame extends React.Component {
     var listofCards = []
     for (var i = 0; i < white_cards.length; i++) {
       var ident = "card-" + String(i)
+      if (!String(white_cards[i]).includes('undefined')){
       listofCards.push(
         <button onClick={this.selectCard} className={"bg-white"} id={ident}>{white_cards[i]}</button>
       )
+    }
+    else{
+      socket.emit('new white cards', 1)
+    }
     }
     // var listofCards = white_cards.map((card) =>   <li
     // classID={card}>{String(card)}</li> )
