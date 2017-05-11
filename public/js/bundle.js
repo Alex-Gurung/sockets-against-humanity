@@ -630,6 +630,7 @@ var thisGame = function (_React$Component) {
       played_cards: "Played Cards go here",
       played_cards_list: [],
       num_to_select: 0,
+      num_needed: 0,
       selected: [],
       last_winner: "last_winner",
       nicknames: { 'you': 'you' },
@@ -718,6 +719,11 @@ var thisGame = function (_React$Component) {
           // alert(the_selects)
           this.setState({ selected: the_selects });
         }
+        console.log('num have ');
+        console.log(this.state.selected.length);
+        console.log('num need');
+        console.log(this.state.num_to_select);
+        console.log(this.state.num_needed);
         if (this.state.selected.length == this.state.num_to_select) {
           socket.emit('selected cards', this.state.selected);
         }
@@ -745,7 +751,7 @@ var thisGame = function (_React$Component) {
       }
       // var listofCards = white_cards.map((card) =>   <li
       // classID={card}>{String(card)}</li> )
-      this.setState({ my_cards: cards, card_list: listofCards, black_card: cards.black.text, num_to_select: cards.black.pick });
+      this.setState({ my_cards: cards, card_list: listofCards, black_card: cards.black.text, num_needed: cards.black.pick, num_to_select: cards.black.pick });
       // alert(cards)
     }
   }, {
@@ -756,7 +762,7 @@ var thisGame = function (_React$Component) {
   }, {
     key: 'updateBlack',
     value: function updateBlack(blackCard) {
-      this.setState({ black_card: blackCard.text, num_to_select: blackCard.pick, played_cards: "Played Cards go here" });
+      this.setState({ black_card: blackCard.text, num_needed: blackCard.pick, num_to_select: blackCard.pick, played_cards: "Played Cards go here" });
     }
   }, {
     key: 'updateWhite',
@@ -783,11 +789,16 @@ var thisGame = function (_React$Component) {
       var listofCards = [];
       for (var i = 0; i < white_cards.length; i++) {
         var ident = "card-" + String(i);
-        listofCards.push(_react2.default.createElement(
-          'button',
-          { onClick: this.selectCard, className: "bg-white", id: ident },
-          String(white_cards[i])
-        ));
+        if (!String(white_cards[i]).includes('undefined')) {
+          listofCards.push(_react2.default.createElement(
+            'button',
+            { onClick: this.selectCard, className: "bg-white", id: ident },
+            String(white_cards[i])
+          ));
+        } else {
+          var current_needed = this.state.num_needed;
+          this.setState({ num_needed: current_needed + 1 });
+        }
       }
       cards.white = white_cards;
       this.setState({ my_cards: cards, card_list: listofCards, selected: [], played_cards: "Played Cards go here" });
@@ -912,7 +923,7 @@ var thisGame = function (_React$Component) {
       });
 
       socket.on('send me white', function (please) {
-        socket.emit('new white cards', _this2.state.num_to_select);
+        socket.emit('new white cards', _this2.state.num_needed);
       });
 
       socket.on('new white cards', function (new_whites) {

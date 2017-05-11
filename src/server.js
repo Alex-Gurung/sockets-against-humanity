@@ -3,7 +3,7 @@ import ReactDOMServer from 'react-dom/server';
 import express from 'express';
 
 const fs = require('fs');
-const cah_json = JSON.parse(fs.readFileSync('public/cah.json', 'utf8'));
+const cah_json = JSON.parse(fs.readFileSync('public/a_to_a.json', 'utf8'));
 
 let app = express();
 
@@ -232,7 +232,7 @@ io.sockets.on('connection', (socket) => {
         chosen: chosen_cards[socket.room]
       })
 
-    while (cards_list.length < 7) {
+    while (cards_list.length < 5) {
       var index = Math.floor(Math.random() * decks_list[game_id]['whiteCards'].length)
       var this_card = decks_list[game_id]['whiteCards'][index];
       if (this_card) {

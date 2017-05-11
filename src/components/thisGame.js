@@ -17,6 +17,7 @@ export default class thisGame extends React.Component {
       played_cards: "Played Cards go here",
       played_cards_list: [],
       num_to_select: 0,
+      num_needed: 0,
       selected: [],
       last_winner: "last_winner",
       nicknames: {'you': 'you'},
@@ -103,6 +104,11 @@ export default class thisGame extends React.Component {
         // alert(the_selects)
         this.setState({selected: the_selects})
       }
+      console.log('num have ')
+      console.log(this.state.selected.length)
+      console.log('num need')
+      console.log(this.state.num_to_select)
+      console.log(this.state.num_needed)
       if (this.state.selected.length == this.state.num_to_select) {
         socket.emit('selected cards', this.state.selected)
       }
@@ -129,7 +135,7 @@ export default class thisGame extends React.Component {
     }
     // var listofCards = white_cards.map((card) =>   <li
     // classID={card}>{String(card)}</li> )
-    this.setState({my_cards: cards, card_list: listofCards, black_card: cards.black.text, num_to_select: cards.black.pick});
+    this.setState({my_cards: cards, card_list: listofCards, black_card: cards.black.text, num_needed:cards.black.pick, num_to_select: cards.black.pick});
     // alert(cards)
   }
 
@@ -138,7 +144,7 @@ export default class thisGame extends React.Component {
   }
 
   updateBlack(blackCard) {
-    this.setState({black_card: blackCard.text, num_to_select: blackCard.pick, played_cards:"Played Cards go here"})
+    this.setState({black_card: blackCard.text, num_needed: blackCard.pick, num_to_select: blackCard.pick, played_cards:"Played Cards go here"})
   }
 
   updateWhite(new_whites) {
@@ -164,9 +170,15 @@ export default class thisGame extends React.Component {
     var listofCards = []
     for (var i = 0; i < white_cards.length; i++) {
       var ident = "card-" + String(i)
+      if (!String(white_cards[i]).includes('undefined')){
       listofCards.push(
         <button onClick={this.selectCard} className={"bg-white"} id={ident}>{String(white_cards[i])}</button>
       )
+    }
+      else{
+        var current_needed = this.state.num_needed
+        this.setState({num_needed: current_needed+1})
+      }
     }
     cards.white = white_cards
     this.setState({my_cards: cards, card_list: listofCards, selected:[], played_cards:"Played Cards go here"})
@@ -225,7 +237,7 @@ export default class thisGame extends React.Component {
     })
 
     socket.on('send me white', (please) => {
-      socket.emit('new white cards', this.state.num_to_select)
+      socket.emit('new white cards', this.state.num_needed)
     })
 
     socket.on('new white cards', (new_whites) => {
