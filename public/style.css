@@ -40,16 +40,22 @@ button {
 }
 
 .flexBox {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex;
+
+	-ms-flex-align: center;
+	-webkit-align-items: center;
+	-webkit-box-align: center;
+
+	align-items: center;
 }
 
-.centerClass {
+/*.centerClass {
     max-width: 50%;
-    flex: 1;
+    flex: 2;
     justify-content: space-between;
-}
+}*/
 li {
     list-style: none;
     width: 20%;
@@ -63,5 +69,5 @@ li {
 .title {
     margin: 0;
     margin-top: 10%;
-    font-size: 5em;
+    font-size: 4.7em;
 }

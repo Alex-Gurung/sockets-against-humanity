@@ -1,5 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router-dom'
+import { Redirect } from 'react-router';
 export default class createJoin extends React.Component {
 
   constructor(props) {
@@ -11,8 +12,10 @@ export default class createJoin extends React.Component {
     this.handleChange = this
       .handleChange
       .bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
     this.state = {
-      gameurl: '/game/'
+      gameurl: '/game/',
+      redirect: false
     }
     socket.on('create game', function (data) {
       this.alert(message)
@@ -34,17 +37,25 @@ export default class createJoin extends React.Component {
     });
   }
 
+  handleKeyPress(event) {
+    if(event.key === "Enter"){
+        this.setState({redirect: true});
+    }
+  }
+
   render() {
+    if (this.state.redirect) {
+      return <Redirect push to={this.state.gameurl} />;
+    }
     return (
       <div className={'flexBox'}>
-        <h1>Create/Join</h1>
+        <div><h1>Create/Join</h1></div>
         {/*<button onClick={this.createGame}>
           Create/Join Game!
         </button>*/}
         
-        <input className={'centerClass'}  type="text" value={this.state.gameid} onChange={this.handleChange}/>
-        <br />
-        <Link className={'centerClass'} to={this.state.gameurl}>Go to Game</Link>
+        <div><input className={'centerClass'}  type="text" value={this.state.gameid} onKeyPress={this.handleKeyPress} onChange={this.handleChange}/></div>
+        <div><Link className={'centerClass'} to={this.state.gameurl}>Go to Game</Link></div>
 
         {/*<h1>Some App Name</h1>
         <ul className="header">

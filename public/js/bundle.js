@@ -413,7 +413,7 @@ var Home = function (_React$Component) {
         _react2.default.createElement(
           'h1',
           { className: "title" },
-          'Sockets Against Humanity!'
+          'Sockets To Sockets!'
         )
       );
     }
@@ -506,6 +506,8 @@ var _react2 = _interopRequireDefault(_react);
 
 var _reactRouterDom = require('react-router-dom');
 
+var _reactRouter = require('react-router');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -525,8 +527,10 @@ var createJoin = function (_React$Component) {
     _this.createGame = _this.createGame.bind(_this);
 
     _this.handleChange = _this.handleChange.bind(_this);
+    _this.handleKeyPress = _this.handleKeyPress.bind(_this);
     _this.state = {
-      gameurl: '/game/'
+      gameurl: '/game/',
+      redirect: false
     };
     socket.on('create game', function (data) {
       this.alert(message);
@@ -553,22 +557,43 @@ var createJoin = function (_React$Component) {
       });
     }
   }, {
+    key: 'handleKeyPress',
+    value: function handleKeyPress(event) {
+      if (event.key === "Enter") {
+        this.setState({ redirect: true });
+      }
+    }
+  }, {
     key: 'render',
     value: function render() {
+      if (this.state.redirect) {
+        return _react2.default.createElement(_reactRouter.Redirect, { push: true, to: this.state.gameurl });
+      }
       return _react2.default.createElement(
         'div',
         { className: 'flexBox' },
         _react2.default.createElement(
-          'h1',
+          'div',
           null,
-          'Create/Join'
+          _react2.default.createElement(
+            'h1',
+            null,
+            'Create/Join'
+          )
         ),
-        _react2.default.createElement('input', { className: 'centerClass', type: 'text', value: this.state.gameid, onChange: this.handleChange }),
-        _react2.default.createElement('br', null),
         _react2.default.createElement(
-          _reactRouterDom.Link,
-          { className: 'centerClass', to: this.state.gameurl },
-          'Go to Game'
+          'div',
+          null,
+          _react2.default.createElement('input', { className: 'centerClass', type: 'text', value: this.state.gameid, onKeyPress: this.handleKeyPress, onChange: this.handleChange })
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
+          _react2.default.createElement(
+            _reactRouterDom.Link,
+            { className: 'centerClass', to: this.state.gameurl },
+            'Go to Game'
+          )
         )
       );
     }
@@ -584,7 +609,7 @@ var createJoin = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = createJoin;
-},{"react":243,"react-router-dom":100}],9:[function(require,module,exports){
+},{"react":243,"react-router":110,"react-router-dom":100}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
