@@ -22,7 +22,7 @@ export default class AllGames extends React.Component {
     // var listofLinks = []
     
     var listofLinks = gameList.map((game) =>
-        <li><button><Link to={'/game/' + game}>{String(game)}</Link></button></li>
+        <li><button><Link style={{display: 'block', height: '100%'}} to={'/game/' + game}>{String(game)}</Link></button></li>
     )
     this.setState({game_list: gameList, listItems: listofLinks})
     // this.setState({game_list: gameList, listItems: gameList.map((item) => {

@@ -41,7 +41,7 @@ export default class thisGame extends React.Component {
     var position = data.position
     var usernames = data.nicknames
     var chosen = data.chosenCards
-    var new_user_to_score = {}
+    var new_user_to_score = []
     var ids = Object.keys(gameList)
     var my_name = ""
     for (var i = 0; i < ids.length; i++){
@@ -49,7 +49,8 @@ export default class thisGame extends React.Component {
         if (ids[i] == socket.id){
           my_name = usernames[ids[i]]
         }
-        new_user_to_score[usernames[ids[i]]] = gameList[ids[i]]
+        new_user_to_score.push({'user':usernames[ids[i]], 'score':gameList[ids[i]]})
+        // new_user_to_score[usernames[ids[i]]] = gameList[ids[i]]
       }
     }
     // alert(data)
@@ -60,6 +61,21 @@ export default class thisGame extends React.Component {
       user_to_score: new_user_to_score,
       your_name: my_name,
     });
+     $('.rows').remove();
+    for (var i = 0; i < new_user_to_score.length; i++){
+      var markup = "<tr class='rows'><td>" + new_user_to_score[i]['user'] + "</td><td>" + new_user_to_score[i]['score']+ "</td></tr>"
+      // var new_row = $(document.createElement('tr'))
+      // $(document.createElement('td').var(new_user_to_score[i]['user'])).appendTo(new_row);
+      // $(document.createElement('td').var(new_user_to_score[i]['score'])).appendTo(new_row);
+      $("table tbody").append(markup);
+    }
+    console.log(new_user_to_score)
+  //   $('#scoreTable').dynatable({
+  //   dataset: {
+  //     records: [new_user_to_score]
+  //   }
+  // });
+  
     this.updateChosen(chosen)
     // console.log('data' + data) alert(this.state.my_cards)
   }
@@ -67,11 +83,13 @@ export default class thisGame extends React.Component {
   updateChosen(cards) {
     var listofChosen = [];
     // alert(cards[0])
+    if (cards){
     for (var i = 0; i < cards.length; i++) {
       var ident = "chosencard-" + String(i)
       listofChosen.push(
         <button onClick={this.czarSelect} className={""} id={ident}>{String(cards[i])}</button>
       )
+    }
     }
     this.setState({played_cards: listofChosen})
   }
@@ -137,6 +155,7 @@ export default class thisGame extends React.Component {
     // classID={card}>{String(card)}</li> )
     this.setState({my_cards: cards, card_list: listofCards, black_card: cards.black.text, num_needed:cards.black.pick, num_to_select: cards.black.pick});
     // alert(cards)
+    // $('button').flowtype();
   }
 
   updateLast(selected) {
@@ -149,10 +168,10 @@ export default class thisGame extends React.Component {
 
   updateWhite(new_whites) {
     // alert(new_whites)
-    var buttons = document.querySelectorAll("button")
-    buttons.forEach((element) => {
-      element.className = "bg-white"
-    })
+    // var buttons = document.querySelectorAll("button")
+    // buttons.forEach((element) => {
+    //   element.className = "bg-white"
+    // })
     var selects = this.state.selected
     var cards = this.state.my_cards
     var white_cards = Array.from(cards.white)
@@ -174,6 +193,8 @@ export default class thisGame extends React.Component {
       listofCards.push(
         <button onClick={this.selectCard} className={"bg-white"} id={ident}>{String(white_cards[i])}</button>
       )
+      document.getElementById(ident).className = ""
+      document.getElementById(ident).classList.add('bg-white')
     }
       else{
         var current_needed = this.state.num_needed
@@ -187,16 +208,21 @@ export default class thisGame extends React.Component {
   render() {
     return (
       <div>
-        <h1>Game id: {this.state.gameId}  ||  <span>Your Position: {this.state.position_list[socket.io.engine.id]}</span></h1>
+        <h1><span>Your Position: {this.state.position_list[socket.io.engine.id]}</span></h1>
         {/*<h2>User: {String(Object.keys(this.state.users))}</h2>*/}
         {/*<h2>Users: {this.state.users}</h2>*/}
-        <h2>Last winner: {this.state.last_winner}</h2>
-        <h3>Number users: {String(Object.keys(this.state.game_list).length)}  ||  <span>Your Score: {String(this.state.game_list[socket.io.engine.id])}  ||  </span>
+        <h2>Number users: {String(Object.keys(this.state.game_list).length)}  ||  <span>Your Score: {String(this.state.game_list[socket.io.engine.id])}  ||  </span>
         <span>Your name: {String(this.state.your_name)}</span>
-        </h3>
-        <h3>Ugly dict (format later) : {JSON.stringify(this.state.user_to_score)}</h3>
+        </h2>
         {/*<h3>Ugly dict (format later) : {JSON.stringify(this.state.game_list)}</h3>*/}
-        
+        <table id="scoreTable">
+        <thead>
+          <th>user</th>
+          <th>score</th>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
         <h1>Black Card: {this.state.black_card}</h1>
         <h3>Number to Select: {this.state.num_to_select}</h3>
         <p>Your Cards:</p>
