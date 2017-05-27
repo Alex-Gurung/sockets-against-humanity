@@ -180,7 +180,7 @@ io.sockets.on('connection', (socket) => {
         if (chosen_cards[old_room].hasOwnProperty(keys[0])){
             delete chosen_cards[old_room][keys[0]]
           }}
-        } 
+        }   
       // }
     }
 
